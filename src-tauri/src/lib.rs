@@ -1,8 +1,8 @@
 use std::process::Command;
-use tauri::State;
+use tauri::command;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
+#[command]
 async fn start_ollama() -> Result<String, String> {
     Command::new("ollama")
         .arg("serve")
@@ -11,7 +11,7 @@ async fn start_ollama() -> Result<String, String> {
     Ok("Ollama server started".to_string())
 }
 
-#[tauri::command]
+#[command]
 async fn list_ollama_models() -> Result<Vec<String>, String> {
     let output = Command::new("ollama")
         .arg("list")
@@ -32,7 +32,7 @@ async fn list_ollama_models() -> Result<Vec<String>, String> {
     Ok(models)
 }
 
-#[tauri::command]
+#[command]
 async fn generate_response(model: &str, prompt: &str) -> Result<String, String> {
     let client = reqwest::Client::new();
     let res = client.post("http://localhost:11434/api/generate")
@@ -51,6 +51,11 @@ async fn generate_response(model: &str, prompt: &str) -> Result<String, String> 
     } else {
         Err(format!("Error: {}", res.status()))
     }
+}
+
+#[command]
+fn greet(name: &str) -> String {
+    format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
