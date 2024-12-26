@@ -35,50 +35,35 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-      <div className="min-h-screen w-full bg-background text-foreground antialiased">
-        <div className="flex h-screen">
-          {isLoading ? (
-            <div className="flex items-center justify-center w-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div style={{ padding: '20px', minHeight: '100vh', background: '#fff' }}>
+      <h1 style={{ marginBottom: '20px' }}>Ollama GUI</h1>
+      
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <div style={{ color: 'red' }}>{error}</div>
+      ) : (
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <Sidebar 
+            onSettingsClick={() => setShowSettings(true)}
+            onChatCountChange={setActiveChats}
+            availableModels={availableModels}
+          />
+          
+          <main style={{ flex: 1 }}>
+            <div className={`chat-container split-${activeChats}`}>
+              {Array.from({ length: activeChats }).map((_, idx) => (
+                <ChatArea key={idx} chatId={idx} availableModels={availableModels} />
+              ))}
             </div>
-          ) : error ? (
-            <div className="flex items-center justify-center w-full">
-              <div className="text-center space-y-4">
-                <h2 className="text-2xl font-bold text-destructive">Error</h2>
-                <p className="text-muted-foreground">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-                >
-                  Retry
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <Sidebar 
-                onSettingsClick={() => setShowSettings(true)}
-                onChatCountChange={setActiveChats}
-                availableModels={availableModels}
-              />
-              
-              <main className="flex-1 overflow-hidden">
-                <div className={`chat-container split-${activeChats}`}>
-                  {Array.from({ length: activeChats }).map((_, idx) => (
-                    <ChatArea key={idx} chatId={idx} availableModels={availableModels} />
-                  ))}
-                </div>
-              </main>
+          </main>
 
-              {showSettings && (
-                <SettingsOverlay onClose={() => setShowSettings(false)} />
-              )}
-            </>
+          {showSettings && (
+            <SettingsOverlay onClose={() => setShowSettings(false)} />
           )}
         </div>
-      </div>
-    </ThemeProvider>
+      )}
+    </div>
   );
 }
 
