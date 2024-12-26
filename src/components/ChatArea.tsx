@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import { invoke } from "@tauri-apps/api";
 
 interface ChatAreaProps {
   chatId: number;
+  availableModels: string[];
 }
 
-export function ChatArea({ chatId }: ChatAreaProps) {
+export function ChatArea({ chatId, availableModels }: ChatAreaProps) {
   const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [input, setInput] = useState('');
+  const [selectedModel, setSelectedModel] = useState(availableModels[0] || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,9 +19,9 @@ export function ChatArea({ chatId }: ChatAreaProps) {
     setMessages(prev => [...prev, { role: 'user', content: input }]);
     setInput('');
 
-    // TODO: Implement actual Ollama API call here
-    // For now, just echo back
-    setMessages(prev => [...prev, { role: 'assistant', content: `Response to: ${input}` }]);
+    // Generate response
+    const response = await invoke<string>("generate_response", { model: selectedModel, prompt: input });
+    setMessages(prev => [...prev, { role: 'assistant', content: response }]);
   };
 
   return (
@@ -36,6 +39,15 @@ export function ChatArea({ chatId }: ChatAreaProps) {
         ))}
       </div>
       <form onSubmit={handleSubmit} className="flex gap-2">
+        <select 
+          value={selectedModel} 
+          onChange={(e) => setSelectedModel(e.target.value)}
+          className="p-2 border rounded"
+        >
+          {availableModels.map(model => (
+            <option key={model} value={model}>{model}</option>
+          ))}
+        </select>
         <input
           type="text"
           value={input}
